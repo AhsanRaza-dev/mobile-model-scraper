@@ -1,7 +1,24 @@
-# Ignore Python virtual environment
-venv/
+# 🐍 Python-related ignores
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.sqlite3
 
-# Ignore environment file
+# 🚫 Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# ⚙️ Environment variables
 .env
+.env.*
+
+# 🧪 IDE & editor settings
+.vscode/
+.idea/
+
+# 📦 Dependencies / cache
+*.egg-info/
+*.log
