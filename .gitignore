@@ -6,7 +6,7 @@ __pycache__/
 *.sqlite3
 
 # 🚫 Virtual environment
-venv/
+venv
 ENV/
 env/
 .venv/
@@ -22,3 +22,4 @@ env/
 # 📦 Dependencies / cache
 *.egg-info/
 *.log
+.gitignore
