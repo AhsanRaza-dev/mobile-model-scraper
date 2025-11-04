@@ -591,7 +591,7 @@ if __name__ == "__main__":
         # OPTION 3: Scrape all brands (will take many hours!)
         # scraper.scrape_all()
         
-        # OPTION 4: Test with limited brands and devices
+        # OPTION 4: Test with limi ted brands and devices
         # scraper.scrape_all(max_brands=2, max_devices_per_brand=5)
         
     except KeyboardInterrupt:
