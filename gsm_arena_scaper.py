@@ -582,7 +582,7 @@ if __name__ == "__main__":
     
     try:
         # OPTION 1: Scrape only Samsung phones (with pagination)
-        url = "https://www.gsmarena.com/apple-phones-48.php"
+        url = "https://www.gsmarena.com/xiaomi-phones-80.php"
         scraper.scrape_brand(url)  # Remove max_devices to scrape all
         
         # OPTION 2: For testing, limit devices
