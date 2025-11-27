@@ -159,6 +159,30 @@ class GSMArenaScraper:
             print(f"✗ Error fetching brands: {e}")
             return []
     
+    def extract_brand_name_from_page(self, brand_url):
+        """Extract the actual brand name from the brand page"""
+        try:
+            response = self._make_request(brand_url, "brand page for name extraction")
+            if not response:
+                return None
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extract brand name from the page title
+            article_hgroup = soup.find('div', class_='article-hgroup')
+            if article_hgroup:
+                h1_tag = article_hgroup.find('h1', class_='article-info-name')
+                if h1_tag:
+                    brand_name = h1_tag.text.strip()
+                    # Remove " phones" or " devices" suffix if present
+                    brand_name = brand_name.replace(' phones', '').replace(' devices', '').strip()
+                    return brand_name
+            
+            return None
+        except Exception as e:
+            print(f"      ✗ Error extracting brand name: {e}")
+            return None
+    
     def save_brand(self, brand_name, brand_url):
         """Save brand to database and return brand_id"""
         try:
@@ -430,9 +454,15 @@ class GSMArenaScraper:
         self.connect_db()
         self.create_tables()
         
-        # Extract brand name from URL
-        brand_name = brand_url.split('/')[-1].replace('-phones-', ' ').replace('.php', '').title()
-        brand_name = brand_name.split('-')[0]  # Get first part before any numbers
+        # Extract brand name from the page
+        print(f"Fetching brand page to extract name...")
+        brand_name = self.extract_brand_name_from_page(brand_url)
+        
+        # Fallback: extract from URL if page extraction fails
+        if not brand_name:
+            print("⚠ Could not extract brand name from page, using URL fallback")
+            brand_name = brand_url.split('/')[-1].replace('-phones-', ' ').replace('.php', '').title()
+            brand_name = brand_name.split('-')[0]
         
         print(f"Processing brand: {brand_name}")
         
@@ -487,6 +517,14 @@ class GSMArenaScraper:
             print(f"\n{'='*60}")
             print(f"[{i}/{len(brands)}] Processing brand: {brand_name}")
             print(f"{'='*60}")
+            
+            # Extract actual brand name from page
+            actual_brand_name = self.extract_brand_name_from_page(brand_url)
+            if actual_brand_name:
+                brand_name = actual_brand_name
+                print(f"  ✓ Extracted brand name from page: {brand_name}")
+            else:
+                print(f"  ⚠ Using brand name from menu: {brand_name}")
             
             # Save brand
             brand_id = self.save_brand(brand_name, brand_url)
@@ -581,17 +619,17 @@ if __name__ == "__main__":
     scraper = GSMArenaScraper(delay_between_requests=DELAY_BETWEEN_REQUESTS)
     
     try:
-        # OPTION 1: Scrape only Samsung phones (with pagination)
+        # OPTION 1: Scrape only a specific brand (with pagination)
         url = input('Enter brand URL to scrape (e.g., https://www.gsmarena.com/samsung-phones-9.php): ').strip()
         scraper.scrape_brand(url)  # Remove max_devices to scrape all
         
         # OPTION 2: For testing, limit devices
-        # scraper.scrape_brand(samsung_url, max_devices=10)
+        # scraper.scrape_brand(url, max_devices=10)
         
         # OPTION 3: Scrape all brands (will take many hours!)
         # scraper.scrape_all()
         
-        # OPTION 4: Test with limi ted brands and devices
+        # OPTION 4: Test with limited brands and devices
         # scraper.scrape_all(max_brands=2, max_devices_per_brand=5)
         
     except KeyboardInterrupt:
@@ -599,4 +637,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n✗ Fatal error: {e}")
     finally:
-        scraper.close() 
+        scraper.close()
